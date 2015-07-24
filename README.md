@@ -21,7 +21,24 @@ $scope.test.save()
   .catch(function(err) {});
 ```
 ## Installation
-
+`npm install angular-parse`
+## Setup
+#### Global
+```html
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+<script src="https://parse.com/downloads/javascript/parse-1.5.0.min.js"></script>
+<script src="path/to/angular-parse/angular-parse.js"></script>
+<script>
+  angular.module('demo', ['ngParse']);
+</script>
+```
+#### CommonJS
+`npm install angular parse angular-parse`
+```javascript
+var angular = require('angular');
+var ngParse = require('angular-parse');
+angular.module('demo', [ngParse]);
+```
 ## Usage
 #### Include `ngParse` module
 ```javascript
@@ -112,4 +129,4 @@ angular.module('demo')
 </div>
 ```
 ## License
-MIT
+[MIT](https://raw.githubusercontent.com/ivnivnch/angular-parse/master/LICENSE)

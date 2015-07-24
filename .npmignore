@@ -1,0 +1,5 @@
+test
+.gitignore
+.npmignore
+karma.conf.js
+webpack.config.js
