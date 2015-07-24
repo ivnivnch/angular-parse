@@ -21,7 +21,10 @@ $scope.test.save()
   .catch(function(err) {});
 ```
 ## Installation
+#### NPM
 `npm install angular-parse`
+#### JSPM
+`jspm install npm:angular-parse`
 ## Setup
 #### Global
 ```html
