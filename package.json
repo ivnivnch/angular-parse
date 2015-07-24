@@ -1,0 +1,40 @@
+{
+  "name": "angular-parse",
+  "version": "0.0.1",
+  "description": "Angular wrapper for Parse.com JavaScript SDK.",
+  "license": "MIT",
+  "author": "Ivan <ivnivnch@gmail.com>",
+  "main": "src/index.js",
+  "keywords": [
+    "angular",
+    "angularjs",
+    "parse",
+    "parsesdk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ivnivnch/angular-parse.git"
+  },
+  "homepage": "https://github.com/ivnivnch/angular-parse",
+  "bugs": {
+    "url": "https://github.com/ivnivnch/angular-parse/issues"
+  },
+  "scripts": {
+    "build": "webpack",
+    "test": "karma start"
+  },
+  "devDependencies": {
+    "angular": "^1.4.3",
+    "angular-mocks": "^1.4.3",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.12.37",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-jasmine": "^0.3.6",
+    "karma-sinon": "^1.0.4",
+    "karma-webpack": "^1.6.0",
+    "lodash": "^3.10.0",
+    "parse": "^1.5.0",
+    "sinon": "^1.15.4",
+    "webpack": "^1.10.5"
+  }
+}
