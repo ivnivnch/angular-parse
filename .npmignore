@@ -1,9 +1,7 @@
-.idea
 test
 .gitignore
 .npmignore
 karma.conf.js
 webpack.config.js
-*.iml
 *.ini
 *.log
