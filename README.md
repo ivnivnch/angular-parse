@@ -26,7 +26,7 @@ $scope.test.save()
 #### JSPM
 `jspm install npm:angular-parse`
 ## Setup
-#### Global
+#### Browser
 ```html
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
 <script src="https://parse.com/downloads/javascript/parse-1.5.0.min.js"></script>
@@ -55,25 +55,39 @@ angular.module('demo')
   }]);
 ```
 #### Initialize Facebook
+```html
+<script src="https://connect.facebook.net/en_US/sdk.js"></script>
+```
 ```javascript
 angular.module('demo')
   .config(['ParseProvider', function(ParseProvider) {
     ParseProvider.FacebookUtils.init({
       appId: MY_FACEBOOK_APP_ID,
+      version: 'v2.4',//Currently available versions https://developers.facebook.com/docs/apps/changelog
+      xfbml: false
     });
   }]);
 ```
-#### Define Classes
+#### Define Class
 ```javascript
 angular.module('demo')
   .factory('ParseCommentClass', ['Parse', function(Parse) {
     return new Parse.Class('Comment', {
+      //attributes for which you want to create es5 getters and setters
       $attributes: ['user', 'text']
     });
   }])
   .config(['ParseProvider', function(ParseProvider) {
     //register factory
     ParseProvider.Class.register('ParseCommentClass');
+  }]);
+```
+#### Define User attributes
+```javascript
+angular.module('demo')
+  .config(['ParseProvider', function(ParseProvider) {
+    //attributes for which you want to create es5 getters and setters
+    ParseProvider.User.defineAttributes('first_name', 'last_name', 'picture');
   }]);
 ```
 #### Authenticate
@@ -110,9 +124,7 @@ angular.module('demo')
 ```javascript
 angular.module('demo')
   .controller('CommentsController', ['$scope', 'Parse', 'ParseCommentClass', function($scope, Parse, ParseCommentClass) {
-    var user = Parse.User.current();
     new Parse.Query(ParseCommentClass)
-      .equalTo('user', user)
       .include('user')
       .then(function(comments) {
         $scope.comments = comments;
@@ -125,8 +137,9 @@ angular.module('demo')
 ```html
 <div ng-controller="CommentsController">
   <div ng-repeat="comment in comments track by comment.$id">
-    <p>{{comment.text}}</p>
     <p>User: {{comment.user.username}}</p>
+    <img ng-src="comment.user.picture"/>
+    <p>{{comment.text}}</p>
     <p>Created At: {{comment.createdAt}}</p>
   </div>
 </div>

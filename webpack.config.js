@@ -13,6 +13,7 @@ module.exports = {
   },
   plugins: [
     new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.OccurenceOrderPlugin(true),
     new webpack.NoErrorsPlugin(),
     new webpack.optimize.UglifyJsPlugin()
   ],

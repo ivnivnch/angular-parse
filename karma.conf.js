@@ -4,12 +4,10 @@ module.exports = function (config) {
   config.set({
     basePath: '',
     files: [
-      './test/index.js',
-      './test/*.spec.js'
+      './test/index.js'
     ],
     preprocessors: {
-      './test/index.js': ['webpack'],
-      './test/*.spec.js': ['webpack']
+      './test/index.js': ['webpack']
     },
     frameworks: ['jasmine', 'sinon'],
     plugins: [
@@ -25,9 +23,6 @@ module.exports = function (config) {
     autoWatch: false,
     singleRun: true,
     browsers: ['Chrome'],
-    client: {
-      useIframe: true
-    },
     webpack: {
       context: __dirname,
       target: 'web',
@@ -41,6 +36,7 @@ module.exports = function (config) {
       },
       plugins: [
         new webpack.optimize.DedupePlugin(),
+        new webpack.optimize.OccurenceOrderPlugin(true),
         new webpack.NoErrorsPlugin()
       ]
     },

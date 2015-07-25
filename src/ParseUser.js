@@ -1,0 +1,135 @@
+var Parse = require('parse').Parse;
+var ngParseModule = require('./module.js');
+require('./ParseClass.js');
+require('./ParsePromiseWrap.js');
+
+/**
+ * @ngdoc object
+ * @name ngParse.ParseUserProvider
+ *
+ * @description
+ * Provider for ParseUser service.
+ */
+ParseUserProvider.$inject = [];
+function ParseUserProvider() {
+  var provider = this;
+  provider.User = Parse.User;
+
+  /**
+   * @ngdoc property
+   * @name ngParse.ParseUserProvider#$attributes
+   * @propertyOf ngParse.ParseUserProvider
+   *
+   * @description
+   * The names of the attributes to create getters and setters.
+   */
+  provider.$attributes = [];
+
+  /**
+   * @ngdoc method
+   * @name ngParse.ParseUserProvider#register
+   * @methodOf ngParse.ParseUserProvider
+   *
+   * @description
+   * Checks whether this user is the current user and has been authenticated.
+   */
+  provider.authenticated = function () {
+    return Boolean(Parse.User.current());
+  };
+
+  /**
+   * @ngdoc method
+   * @name ngParse.ParseUserProvider#defineAttributes
+   * @methodOf ngParse.ParseUserProvider
+   *
+   * @description
+   * Defines attributes for Parse.User.
+   *
+   * @param {...string|string[]} attributes Class names for registration.
+   */
+  provider.defineAttributes = function (attributes) {
+    if (!(attributes instanceof Array)) {
+      attributes = Array.prototype.slice.call(arguments);
+    }
+
+    provider.$attributes.push.apply(provider.$attributes, attributes);
+  };
+
+  /**
+   * @ngdoc service
+   * @name ngParse.ParseUser
+   *
+   * @requires ngParse.ParsePromiseWrap
+   * @requires ngParse.ParseClass
+   *
+   * @description
+   * This is a wrapper for
+   * [Parse.ParseUser]{@link https://parse.com/docs/js/api/symbols/Parse.User.html}.
+   */
+  provider.$get = $get;
+  $get.$inject = ['ParsePromiseWrap', 'ParseClass'];
+  function $get(ParsePromiseWrap, ParseClass) {
+    var ParseUser = Parse.User;
+
+    if (!Parse.$$init) {
+      Object.defineProperties(ParseUser.prototype, {
+        username: {
+          get: function () {
+            return this.getUsername();
+          },
+          set: function (value) {
+            this.setUsername(value);
+          },
+          configurable: true,
+          enumerable: true
+        },
+        password: {
+          get: function () {
+            return this.get('password');
+          },
+          set: function (value) {
+            this.setPassword(value);
+          },
+          configurable: true,
+          enumerable: true
+        },
+        email: {
+          get: function () {
+            return this.getEmail();
+          },
+          set: function (value) {
+            this.setEmail(value);
+          },
+          configurable: true,
+          enumerable: true
+        },
+        auth: {
+          get: function () {
+            return this.authenticated();
+          },
+          configurable: true,
+          enumerable: false
+        },
+        current: {
+          get: function () {
+            return this.isCurrent();
+          },
+          configurable: true,
+          enumerable: false
+        }
+      });
+
+      ParsePromiseWrap.wrapMethods(ParseUser, ['become', 'enableRevocableSession', 'logIn', 'logOut', 'requestPasswordReset', 'signUp']);
+      ParsePromiseWrap.wrapMethods(ParseUser.prototype, ['logIn', 'signUp']);
+    }
+
+    ParseClass.defineAttributes(ParseUser, provider.$attributes);
+
+    ParseClass.$classes['ParseUser'] = ParseUser;
+
+    return ParseUser;
+  }
+}
+
+module.exports = ngParseModule
+  .provider('ParseUser', ParseUserProvider);

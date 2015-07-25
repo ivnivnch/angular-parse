@@ -1,7 +1,7 @@
 var module = angular.mock.module;
 var inject = angular.mock.inject;
 
-describe('Object', function () {
+describe('ParseObject', function () {
   beforeEach(module('ngParse'));
 
   describe('equal', function () {

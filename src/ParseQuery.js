@@ -1,23 +1,24 @@
 var Parse = require('parse').Parse;
 var ngParseModule = require('./module.js');
+require('./ParsePromiseWrap.js');
 
 /**
  * @ngdoc service
  * @name ngParse.ParseQuery
  *
- * @requires ngParse.ParseUtils
+ * @requires ngParse.ParsePromiseWrap
  *
  * @description
  * This is a wrapper for
  * [Parse.ParseQuery]{@link https://parse.com/docs/js/api/symbols/Parse.Query.html}.
  */
-ParseQueryFactory.$inject = ['ParseUtils'];
-function ParseQueryFactory(ParseUtils) {
+ParseQueryFactory.$inject = ['ParsePromiseWrap'];
+function ParseQueryFactory(ParsePromiseWrap) {
   var ParseQuery = Parse.Query;
 
-  if (Parse.$$init) return ParseQuery;
-
-  ParseUtils.wrapMethods(ParseQuery.prototype, ['count', 'each', 'find', 'first', 'get']);
+  if (!Parse.$$init) {
+    ParsePromiseWrap.wrapMethods(ParseQuery.prototype, ['count', 'each', 'find', 'first', 'get']);
+  }
 
   return ParseQuery;
 }

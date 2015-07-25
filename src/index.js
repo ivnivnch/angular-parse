@@ -1,11 +1,11 @@
 var ngParseModule = require('./module.js');
 require('./Parse.js');
-require('./Utils.js');
-require('./Object.js');
-require('./Class.js');
-require('./Query.js');
-require('./Cloud.js');
-require('./User.js');
-require('./FacebookUtils');
+require('./ParseClass.js');
+require('./ParseCloud.js');
+require('./ParseFacebookUtils');
+require('./ParseObject.js');
+require('./ParsePromiseWrap.js');
+require('./ParseQuery.js');
+require('./ParseUser.js');
 
 module.exports = ngParseModule.name;

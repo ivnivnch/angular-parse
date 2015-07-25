@@ -1,6 +1,6 @@
 {
   "name": "angular-parse",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Angular wrapper for Parse.com JavaScript SDK.",
   "license": "MIT",
   "author": "Ivan <ivnivnch@gmail.com>",
@@ -29,6 +29,7 @@
     "jasmine-core": "^2.3.4",
     "karma": "^0.12.37",
     "karma-chrome-launcher": "^0.2.0",
+    "karma-coverage": "^0.4.2",
     "karma-jasmine": "^0.3.6",
     "karma-sinon": "^1.0.4",
     "karma-webpack": "^1.6.0",

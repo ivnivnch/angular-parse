@@ -1,7 +1,7 @@
 var module = angular.mock.module;
 var inject = angular.mock.inject;
 
-describe('User', function () {
+describe('ParseUser', function () {
   beforeEach(module('ngParse'));
 
   describe('equal', function () {
@@ -74,15 +74,30 @@ describe('User', function () {
         expect(user.get('name')).toBe('name');
         expect(user.name).toBe('name');
 
-        user.name = 'new name';
-
-        expect(user.get('name')).toBe('new name');
-        expect(user.name).toBe('new name');
-
         user.avatar = 'avatar';
 
         expect(user.get('avatar')).toBe('avatar');
         expect(user.avatar).toBe('avatar');
+      });
+    });
+
+    it('should define attributes in provider', function () {
+      module(function (ParseUserProvider) {
+        ParseUserProvider.defineAttributes('first_name', 'last_name');
+      });
+
+      inject(function (ParseUser) {
+        var user = new ParseUser({
+          first_name: 'first_name'
+        });
+
+        expect(user.get('first_name')).toBe('first_name');
+        expect(user.first_name).toBe('first_name');
+
+        user.last_name = 'last_name';
+
+        expect(user.get('last_name')).toBe('last_name');
+        expect(user.last_name).toBe('last_name');
       });
     });
   });

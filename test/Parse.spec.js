@@ -6,8 +6,8 @@ describe('Parse', function () {
 
   describe('equal', function () {
     it('should equal Parse', function () {
-      inject(function (Parse) {
-        expect(Parse).toEqual(global.Parse);
+      inject(function (_Parse_) {
+        expect(_Parse_).toEqual(Parse);
       });
     });
   });

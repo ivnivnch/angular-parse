@@ -1,5 +1,6 @@
 var Parse = require('parse').Parse;
 var ngParseModule = require('./module.js');
+require('./ParsePromiseWrap.js');
 
 /**
  * @ngdoc object
@@ -32,7 +33,7 @@ function ParseFacebookUtilsProvider() {
    * Initializes Parse Facebook integration.
    * See [`Parse.FacebookUtils.init`]{@link https://parse.com/docs/js/api/symbols/Parse.FacebookUtils.html#.init}.
    *
-   * @param {object} options  Facebook options argument.
+   * @param {object} options Facebook options argument.
    * See [`Parse.FacebookUtils.init`]{@link https://parse.com/docs/js/api/symbols/Parse.FacebookUtils.html#.init}.
    */
   provider.initialize = provider.init = function (options) {
@@ -43,20 +44,20 @@ function ParseFacebookUtilsProvider() {
    * @ngdoc object
    * @name ngParse.ParseFacebookUtils
    *
-   * @requires ngParse.ParseUtils
+   * @requires ngParse.ParsePromiseWrap
    *
    * @description
    * This is a wrapper for
    * [Parse.FacebookUtils]{@link https://parse.com/docs/js/api/symbols/Parse.FacebookUtils.html}.
    */
   provider.$get = $get;
-  $get.$inject = ['ParseUtils'];
-  function $get(ParseUtils) {
+  $get.$inject = ['ParsePromiseWrap'];
+  function $get(ParsePromiseWrap) {
     var ParseFacebookUtils = Parse.FacebookUtils;
 
-    if (Parse.$$init) return ParseFacebookUtils;
-
-    ParseUtils.wrapMethods(ParseFacebookUtils, ['link', 'logIn', 'unlink']);
+    if (!Parse.$$init) {
+      ParsePromiseWrap.wrapMethods(ParseFacebookUtils, ['link', 'logIn', 'unlink']);
+    }
 
     return ParseFacebookUtils;
   }

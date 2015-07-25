@@ -1,7 +1,7 @@
 var module = angular.mock.module;
 var inject = angular.mock.inject;
 
-describe('Class', function () {
+describe('ParseClass', function () {
   beforeEach(module('ngParse'));
 
   describe('equal', function () {
@@ -47,6 +47,8 @@ describe('Class', function () {
 
     it('should work with parse/ES5 getters setters', function () {
       inject(function (TestParseClass) {
+        console.dir(JSON.stringify(TestParseClass.$attributes));
+
         var test = new TestParseClass({
           first: 'first'
         });
@@ -78,24 +80,54 @@ describe('Class', function () {
 
     it('should define attributes', function () {
       inject(function (TestParseClass) {
-        TestParseClass.defineAttributes('other', 'another');
+        TestParseClass.defineAttributes('fourth', 'fifth');
 
         var test = new TestParseClass({
-          other: 'other'
+          fourth: 'fourth'
         });
 
-        expect(test.get('other')).toBe('other');
-        expect(test.other).toBe('other');
+        expect(test.get('fourth')).toBe('fourth');
+        expect(test.fourth).toBe('fourth');
 
-        test.other = 'new other';
+        test.fifth = 'fifth';
 
-        expect(test.get('other')).toBe('new other');
-        expect(test.other).toBe('new other');
+        expect(test.get('fifth')).toBe('fifth');
+        expect(test.fifth).toBe('fifth');
+      });
+    });
 
-        test.another = 'another';
+    it('should define attributes for all classes', function () {
+      module(function ($provide, ParseClassProvider) {
+        $provide.factory('DemoParseClass', function (ParseClass) {
+          return ParseClass('DemoParseClass', {
+            $attributes: ['first']
+          });
+        });
 
-        expect(test.get('another')).toBe('another');
-        expect(test.another).toBe('another');
+        ParseClassProvider.defineAttributes('sixth', 'seventh');
+      });
+
+      inject(function (TestParseClass, DemoParseClass) {
+        var test = new TestParseClass({
+          sixth: 'sixth'
+        });
+
+        test.seventh = 'seventh';
+
+        expect(test.get('sixth')).toBe('sixth');
+        expect(test.get('seventh')).toBe('seventh');
+
+        var demo = new DemoParseClass({
+          sixth: 'sixth'
+        });
+
+        expect(demo.get('sixth')).toBe('sixth');
+        expect(demo.sixth).toBe('sixth');
+
+        demo.seventh = 'seventh';
+
+        expect(demo.get('seventh')).toBe('seventh');
+        expect(demo.seventh).toBe('seventh');
       });
     });
   });

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Angular Parse</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+  <script src="https://parse.com/downloads/javascript/parse-1.5.0.min.js"></script>
+  <script src="../angular-parse.js"></script>
+  <script>
+    angular.module('demo', ['ngParse'])
+      .controller('Main', ['Parse', function (Parse) {
+        this.Parse = Parse;
+      }]);
+  </script>
+</head>
+<body ng-app="demo" ng-controller="Main as main">
+<p><a href="https://parse.com/docs/js/guide">Parse.com JavaScript SDK</a></p>
+<p>VERSION: {{main.Parse.VERSION}}</p>
+</body>
+</html>
