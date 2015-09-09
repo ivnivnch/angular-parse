@@ -4,6 +4,10 @@ var inject = angular.mock.inject;
 describe('ParseUser', function () {
   beforeEach(module('ngParse'));
 
+  beforeEach(function () {
+    ParseInitialize();
+  });
+
   describe('equal', function () {
     it('should equal Parse.User', function () {
       inject(function (ParseUser) {

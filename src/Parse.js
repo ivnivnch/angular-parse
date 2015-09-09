@@ -3,10 +3,11 @@ var ngParseModule = require('./module.js');
 require('./ParseClass.js');
 require('./ParseCloud.js');
 require('./ParseFacebookUtils');
+require('./ParseFile');
 require('./ParseObject.js');
-require('./ParsePromiseWrap.js');
 require('./ParseQuery.js');
 require('./ParseUser.js');
+require('./ParseUtils.js');
 
 /**
  * @ngdoc object
@@ -60,8 +61,8 @@ function ParseProvider(ParseClassProvider, ParseFacebookUtilsProvider, ParseUser
    * Initializes Parse.
    * See [Parse.initialize]{@link https://parse.com/docs/js/api/symbols/Parse.html#.initialize}.
    *
-   * @param {string} applicationId Your Parse Application ID.
-   * @param {string} javaScriptKey Your Parse JavaScript Key.
+   * @param {String} applicationId Your Parse Application ID.
+   * @param {String} javaScriptKey Your Parse JavaScript Key.
    */
   provider.initialize = function (applicationId, javaScriptKey) {
     Parse.initialize(applicationId, javaScriptKey);
@@ -71,12 +72,30 @@ function ParseProvider(ParseClassProvider, ParseFacebookUtilsProvider, ParseUser
    * @ngdoc object
    * @name ngParse.Parse
    *
+   * @requires ngParse.ParseClass
+   * @requires ngParse.ParseCloud
+   * @requires ngParse.ParseFacebookUtils
+   * @requires ngParse.ParseFile
+   * @requires ngParse.ParseObject
+   * @requires ngParse.ParseQuery
+   * @requires ngParse.ParseUser
+   * @requires ngParse.ParseUtils
+   *
    * @description
    * This is a wrapper for [Parse]{@link https://parse.com/docs/js/api/symbols/Parse.html}.
    */
-  provider.$get = $get;
-  $get.$inject = [];
-  function $get() {
+  provider.$get = ParseFactory;
+  ParseFactory.$inject = [
+    'ParseClass',
+    'ParseCloud',
+    'ParseFacebookUtils',
+    'ParseFile',
+    'ParseObject',
+    'ParseQuery',
+    'ParseUser',
+    'ParseUtils'
+  ];
+  function ParseFactory() {
     return Parse;
   }
 }
@@ -85,23 +104,15 @@ function ParseProvider(ParseClassProvider, ParseFacebookUtilsProvider, ParseUser
  * @ngdoc function
  * @name init
  *
- * @requires ngParse.ParseClass
- * @requires ngParse.ParseCloud
- * @requires ngParse.ParseFacebookUtils
- * @requires ngParse.ParseObject
  * @requires ngParse.Parse
- * @requires ngParse.ParsePromiseWrap
- * @requires ngParse.ParseQuery
- * @requires ngParse.ParseUser
  *
  * @description
- * Initializes ngParse services.
+ * Initializes ngParse.
  */
-init.$inject = ['ParseClass', 'ParseCloud', 'ParseFacebookUtils', 'ParseObject', 'Parse', 'ParsePromiseWrap', 'ParseQuery', 'ParseUser'];
-function init(ParseClass, ParseCloud, ParseFacebookUtils, ParseObject, Parse, ParsePromiseWrap, ParseQuery, ParseUser) {
-  Parse.$$init = true;
+init.$inject = ['Parse'];
+function init() {
 }
 
-module.exports = ngParseModule
+ngParseModule
   .provider('Parse', ParseProvider)
   .run(init);

@@ -1,7 +1,7 @@
 var module = angular.mock.module;
 var inject = angular.mock.inject;
 
-describe('ParseQuery', function () {
+describe('ParseFile', function () {
   beforeEach(module('ngParse'));
 
   beforeEach(function () {
@@ -9,9 +9,9 @@ describe('ParseQuery', function () {
   });
 
   describe('equal', function () {
-    it('should equal Parse.Query', function () {
-      inject(function (ParseQuery) {
-        expect(ParseQuery).toEqual(global.Parse.Query);
+    it('should equal Parse.File', function () {
+      inject(function (ParseFile) {
+        expect(ParseFile).toEqual(global.Parse.File);
       });
     });
   });

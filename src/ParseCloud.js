@@ -1,27 +1,27 @@
 var Parse = require('parse').Parse;
 var ngParseModule = require('./module.js');
-require('./ParsePromiseWrap.js');
+require('./ParseUtils.js');
 
 /**
  * @ngdoc object
  * @name ngParse.ParseCloud
  *
- * @requires ngParse.ParsePromiseWrap
+ * @requires ngParse.ParseUtils
  *
  * @description
  * This is a wrapper for
  * [Parse.Cloud]{@link https://parse.com/docs/js/api/symbols/Parse.Cloud.html}.
  */
-ParseCloudFactory.$inject = ['ParsePromiseWrap'];
-function ParseCloudFactory(ParsePromiseWrap) {
+ParseCloudFactory.$inject = ['ParseUtils'];
+function ParseCloudFactory(ParseUtils) {
   var ParseCloud = Parse.Cloud;
 
-  if (!Parse.$$init) {
-    ParsePromiseWrap.wrapMethods(ParseCloud, ['run']);
-  }
+  ['run'].forEach(function (method) {
+    ParseCloud[ParseUtils.wrapPrefix + method] = ParseUtils.wrap(ParseCloud[method]);
+  });
 
   return ParseCloud;
 }
 
-module.exports = ngParseModule
+ngParseModule
   .factory('ParseCloud', ParseCloudFactory);

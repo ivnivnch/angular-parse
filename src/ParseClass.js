@@ -1,5 +1,6 @@
 var angular = require('angular');
 var Parse = require('parse').Parse;
+var utils = require('./utils.js');
 var ngParseModule = require('./module.js');
 
 /**
@@ -42,7 +43,7 @@ function ParseClassProvider() {
    * Register factories, which create Parse classes.
    * It may be helpful to Initialize Parse classes before using.
    *
-   * @param {...string|string[]} classes Class names for registration.
+   * @param {...String|String[]} classes Class names for registration.
    */
   provider.register = function (classes) {
     if (!angular.isArray(classes)) {
@@ -62,14 +63,14 @@ function ParseClassProvider() {
    * @description
    * Defines attributes for all classes.
    *
-   * @param {...string|string[]} attributes Class names for registration.
+   * @param {...String|String[]} attributes Class names for registration.
    */
   provider.defineAttributes = function (attributes) {
     if (!angular.isArray(attributes)) {
       attributes = Array.prototype.slice.call(arguments);
     }
 
-    union(provider.$attributes, attributes);
+    utils.union(provider.$attributes, attributes);
   };
 
   /**
@@ -81,15 +82,16 @@ function ParseClassProvider() {
    * [`Parse.Object.extend`]{@link https://parse.com/docs/js/api/symbols/Parse.Object.html#.extend}.
    * Creates a new subclass of Parse.Object for the given Parse class name.
    */
-  provider.$get = $get;
-  $get.$inject = [];
-  function $get() {
-    var extend = Parse.Object.extend.bind(Parse.Object);
+  provider.$get = ParseClassFactory;
+  ParseClassFactory.$inject = [];
+  function ParseClassFactory() {
+    var extend = Parse.Object.extend;
 
     function ParseClass(className, protoProps, classProps) {
-      var parseClass = extend(className, protoProps, classProps);
-      var attributes = angular.isObject(protoProps) && angular.isArray(protoProps.$attributes) ?
-        protoProps.$attributes : [];
+      protoProps = Object(protoProps);
+
+      var parseClass = extend.call(Parse.Object, className, protoProps, classProps);
+      var attributes = angular.isArray(protoProps.$attributes) ? protoProps.$attributes : [];
 
       defineAttributes(parseClass, attributes);
 
@@ -100,12 +102,13 @@ function ParseClassProvider() {
      * @ngdoc method
      * @name ngParse.ParseClass#defineAttributes
      * @methodOf ngParse.ParseClass
+     * @static
      *
      * @description
      * Defines the attributes of the class.
      *
-     * @param {object} Class Subclass of Parse.Object.
-     * @param {...string|string[]} attributes Attribute names.
+     * @param {Object} Class Subclass of Parse.Object.
+     * @param {...String|String[]} attributes Attribute names.
      */
     ParseClass.defineAttributes = defineAttributes;
     function defineAttributes(Class, attributes) {
@@ -133,7 +136,7 @@ function ParseClassProvider() {
           });
         });
 
-        union(Class.$attributes, attributes);
+        utils.union(Class.$attributes, attributes);
       };
 
       Class.defineAttributes(provider.$attributes);
@@ -144,6 +147,7 @@ function ParseClassProvider() {
      * @ngdoc property
      * @name ngParse.ParseClassProvider#$classes
      * @propertyOf ngParse.ParseClass
+     * @static
      *
      * @description
      * Registered classes.
@@ -154,26 +158,6 @@ function ParseClassProvider() {
 
     return ParseClass;
   }
-}
-
-/**
- * Creates an array of unique values, in order,
- * from all of the provided arrays.
- */
-function union() {
-  var dst = angular.isArray(arguments[0]) && arguments[0] || [];
-  var src = Array.prototype.slice.call(arguments, 1);
-
-  for (var i = 0, srcLength = src.length, arr; i < srcLength; i++) {
-    arr = src[i];
-    if (!angular.isArray(arr)) continue;
-    for (var j = 0, arrLength = arr.length, val; j < arrLength; j++) {
-      val = arr[j];
-      if (dst.indexOf(val) == -1) dst.push(val);
-    }
-  }
-
-  return dst;
 }
 
 /**
@@ -195,6 +179,6 @@ function init($injector, ParseClass) {
   }
 }
 
-module.exports = ngParseModule
+ngParseModule
   .provider('ParseClass', ParseClassProvider)
   .run(init);

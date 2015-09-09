@@ -1,67 +1,75 @@
 var Parse = require('parse').Parse;
 var ngParseModule = require('./module.js');
-require('./ParsePromiseWrap.js');
+require('./ParseUtils.js');
 
 /**
  * @ngdoc service
  * @name ngParse.ParseObject
  *
- * @requires ngParse.ParsePromiseWrap
+ * @requires $rootScope
+ * @requires ngParse.ParseUtils
  *
  * @description
  * This is a wrapper for
  * [Parse.Object]{@link https://parse.com/docs/js/api/symbols/Parse.Object.html}.
  */
-ParseObjectFactory.$inject = ['ParsePromiseWrap'];
-function ParseObjectFactory(ParsePromiseWrap) {
+ParseObjectFactory.$inject = ['$rootScope', 'ParseUtils'];
+function ParseObjectFactory($rootScope, ParseUtils) {
   var ParseObject = Parse.Object;
 
-  if (!Parse.$$init) {
-    Object.defineProperty(ParseObject.prototype, '$id', {
-      get: function () {
-        return this.$$id === undefined || this.$$id === null ? this.id : this.$$id;
-      },
-      set: function (value) {
-        this.$$id = value;
-      },
-      configurable: false,
-      enumerable: false
-    });
+  Object.defineProperty(ParseObject.prototype, '$id', {
+    get: function () {
+      return this.$$id === undefined || this.$$id === null ? this.id : this.$$id;
+    },
+    set: function (value) {
+      this.$$id = value;
+    },
+    configurable: true,
+    enumerable: false
+  });
 
-    ParsePromiseWrap.wrapMethods(ParseObject, ['destroyAll', 'fetchAll', 'fetchAllIfNeeded', 'saveAll']);
-    ParsePromiseWrap.wrapMethods(ParseObject.prototype, ['destroy', 'fetch', 'save']);
+  ['destroyAll', 'fetchAll', 'fetchAllIfNeeded', 'saveAll'].forEach(function (method) {
+    ParseObject[ParseUtils.wrapPrefix + method] = ParseUtils.wrap(ParseObject[method]);
+  });
 
-    /**
-     * @ngdoc method
-     * @name ngParse.ParseObject.prototype#isDirty
-     * @methodOf ngParse.ParseObject.prototype
-     *
-     * @description
-     * Check whether the object is dirty.
-     *
-     * @returns {boolean} Returns true if object is dirty.
-     */
-    ParseObject.prototype.isDirty = function () {
-      return Boolean(this.dirtyKeys().length);
+  ['destroy', 'fetch', 'save'].forEach(function (method) {
+    ParseObject.prototype[ParseUtils.wrapPrefix + method] = ParseUtils.wrap(ParseObject.prototype[method]);
+  });
+
+  /**
+   * @ngdoc method
+   * @name ngParse.ParseObject#$on
+   * @methodOf ngParse.ParseObject
+   *
+   * @description
+   * Bind event.
+   *
+   * @param {Object} $scope Angular $scope.
+   * @param {String} eventName Event name.
+   * @param {Function} callback Callback function.
+   * @param {Object=} context Callback context.
+   * @returns {Function} Unbind function.
+   */
+  ParseObject.prototype.$on = function ($scope, eventName, callback, context) {
+    if (!($scope instanceof $rootScope.constructor)) throw TypeError("$scope is not instanceof Scope");
+    if (typeof eventName != 'string') throw TypeError("eventName is not string");
+    if (typeof callback != 'function') throw TypeError("callback is not function");
+
+    var _callback = function () {
+      var args = Array.prototype.slice.call(arguments);
+      $scope.$applyAsync(callback.bind(context, args));
     };
 
-    /**
-     * @ngdoc method
-     * @name ngParse.ParseObject.prototype#isCreated
-     * @methodOf ngParse.ParseObject.prototype
-     *
-     * @description
-     * Check whether the object is created.
-     *
-     * @returns {boolean} Returns true if object is created.
-     */
-    ParseObject.prototype.isCreated = function () {
-      return Boolean(this.createdAt);
-    };
-  }
+    this.on(eventName, _callback, context);
+
+    var off = this.off.bind(this, eventName, _callback, context);
+    $scope.$on('$destroy', off);
+
+    return off;
+  };
 
   return ParseObject;
 }
 
-module.exports = ngParseModule
+ngParseModule
   .factory('ParseObject', ParseObjectFactory);

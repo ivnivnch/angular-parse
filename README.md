@@ -23,8 +23,6 @@ $scope.test.save()
 ## Installation
 #### NPM
 `npm install angular-parse`
-#### JSPM
-`jspm install npm:angular-parse`
 ## Setup
 #### Browser
 ```html
@@ -87,7 +85,7 @@ angular.module('demo')
 angular.module('demo')
   .config(['ParseProvider', function(ParseProvider) {
     //attributes for which you want to create es5 getters and setters
-    ParseProvider.User.defineAttributes('first_name', 'last_name', 'picture');
+    ParseProvider.User.defineAttributes('first_name', 'last_name', 'picture', 'comments');
   }]);
 ```
 #### Authenticate
@@ -126,6 +124,7 @@ angular.module('demo')
   .controller('CommentsController', ['$scope', 'Parse', 'ParseCommentClass', function($scope, Parse, ParseCommentClass) {
     new Parse.Query(ParseCommentClass)
       .include('user')
+      .find()
       .then(function(comments) {
         $scope.comments = comments;
       })
@@ -144,5 +143,20 @@ angular.module('demo')
   </div>
 </div>
 ```
+#### Events
+```javascript
+angular.module('demo')
+  .controller('MainController', ['$scope', 'Parse', function($scope, Parse) {
+    var user = Parse.User.current();
+    
+    user.$on($scope, 'change', function() {
+      $scope.userChanged = true;
+    });
+    
+    user.name = 'new name';
+    user.save();
+  }]);
+```
+## Test
 ## License
 [MIT](https://raw.githubusercontent.com/ivnivnch/angular-parse/master/LICENSE)

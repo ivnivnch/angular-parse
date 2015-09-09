@@ -4,6 +4,10 @@ var inject = angular.mock.inject;
 describe('ParseFacebookUtils', function () {
   beforeEach(module('ngParse'));
 
+  beforeEach(function () {
+    ParseInitialize();
+  });
+
   describe('equal', function () {
     it('should equal Parse.FacebookUtils', function () {
       inject(function (ParseFacebookUtils) {

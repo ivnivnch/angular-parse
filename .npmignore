@@ -3,5 +3,3 @@ test
 .npmignore
 karma.conf.js
 webpack.config.js
-*.ini
-*.log

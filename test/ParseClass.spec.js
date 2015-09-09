@@ -4,6 +4,10 @@ var inject = angular.mock.inject;
 describe('ParseClass', function () {
   beforeEach(module('ngParse'));
 
+  beforeEach(function () {
+    ParseInitialize();
+  });
+
   describe('equal', function () {
     it('should equal', function () {
       inject(function (ParseClass) {
@@ -47,8 +51,6 @@ describe('ParseClass', function () {
 
     it('should work with parse/ES5 getters setters', function () {
       inject(function (TestParseClass) {
-        console.dir(JSON.stringify(TestParseClass.$attributes));
-
         var test = new TestParseClass({
           first: 'first'
         });
@@ -206,83 +208,6 @@ describe('ParseClass', function () {
         expect(first_initialized).toBe(true);
         expect(second_initialized).toBe(true);
         expect(third_initialized).toBe(true);
-      });
-    });
-  });
-
-  describe('promises', function () {
-    afterEach(function () {
-      ParseMock.clearStubs();
-    });
-
-    it('should save', function () {
-      var id = '1';
-      var value = 'value';
-
-      var stub = ParseMock.stubObjectSave(function (options) {
-        if (options.objectId != id) return;
-        return this;
-      });
-
-      inject(function (ParseClass) {
-        var ParseTest = new ParseClass('Test', {
-          $attributes: ['value']
-        });
-
-        var test = new ParseTest({id: id, value: value});
-
-        test.save();
-
-        expect(test.value).toEqual(value);
-        expect(stub.callCount).toEqual(1);
-      });
-    });
-
-    it('should fetch', function () {
-      var id = '1';
-      var value = 'value';
-
-      var stub = ParseMock.stubObjectFetch(function (options) {
-        if (options.objectId != id) return;
-        this.set('value', value);
-        return this;
-      });
-
-      inject(function (ParseClass) {
-        var ParseTest = new ParseClass('Test', {
-          $attributes: ['value']
-        });
-
-        var test = new ParseTest({id: id});
-
-        test.fetch();
-
-        expect(test.value).toEqual(value);
-        expect(stub.callCount).toEqual(1);
-      });
-    });
-
-    it('should destroy', function () {
-      var id = '1';
-      var value = 'value';
-
-      var stub = ParseMock.stubObjectDestroy(function (options) {
-        if (options.objectId != id) return;
-        this.unset('value');
-        return this;
-      });
-
-      inject(function (ParseClass) {
-        var ParseTest = new ParseClass('Test', {
-          $attributes: ['value']
-        });
-
-        var test = new ParseTest({id: id, value: value});
-
-        test.destroy();
-
-        expect(test.value).toEqual(undefined);
-        expect(stub.callCount).toEqual(1);
       });
     });
   });

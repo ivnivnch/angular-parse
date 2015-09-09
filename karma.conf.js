@@ -9,11 +9,10 @@ module.exports = function (config) {
     preprocessors: {
       './test/index.js': ['webpack']
     },
-    frameworks: ['jasmine', 'sinon'],
+    frameworks: ['jasmine'],
     plugins: [
       require('karma-webpack'),
       require('karma-jasmine'),
-      require('karma-sinon'),
       require('karma-chrome-launcher')
     ],
     port: 9876,
@@ -29,11 +28,6 @@ module.exports = function (config) {
       devtool: '#inline-source-map',
       cache: true,
       watch: false,
-      module: {
-        noParse: [
-          /sinon/
-        ]
-      },
       plugins: [
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurenceOrderPlugin(true),

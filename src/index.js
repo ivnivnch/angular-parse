@@ -1,11 +1,12 @@
-var ngParseModule = require('./module.js');
+require('parse');
 require('./Parse.js');
 require('./ParseClass.js');
 require('./ParseCloud.js');
 require('./ParseFacebookUtils');
+require('./ParseFile');
 require('./ParseObject.js');
-require('./ParsePromiseWrap.js');
 require('./ParseQuery.js');
 require('./ParseUser.js');
+require('./ParseUtils.js');
 
-module.exports = ngParseModule.name;
+module.exports = require('./module.js').name;

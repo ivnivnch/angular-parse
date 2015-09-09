@@ -1,13 +1,14 @@
-var angular = require('angular');
+require('angular');
 require('angular-mocks');
 var Parse = require('parse').Parse;
-var ParseMock = require('./parse-mock.js');
 require('../src/index.js');
+require('../src/ParseMock.js');
 
 global.Parse = Parse;
-global.ParseMock = ParseMock;
-global.module = angular.mock.module;
-global.inject = angular.mock.inject;
+global.ParseInitialize = function () {
+  var applicationId = 'TEST_APP_ID', javaScriptKey = 'TEST_JS_KEY';
+  Parse.initialize(applicationId, javaScriptKey);
+};
 
 var testsContext = require.context(__dirname, false, /\.spec\.js/);
 testsContext.keys().forEach(testsContext);
