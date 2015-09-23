@@ -49,18 +49,6 @@ function ParseProvider() {
   // Parse
   var AngularParse = Object.create(Parse);
 
-  // ParseObject
-  Object.defineProperty(AngularParse.Object.prototype, '$id', {
-    get: function () {
-      return this.$$id === undefined || this.$$id === null ? this.id : this.$$id;
-    },
-    set: function (value) {
-      this.$$id = value;
-    },
-    configurable: true,
-    enumerable: false
-  });
-
   // ParseUser
   defineAttributes(AngularParse.User, ['email', 'password', 'username']);
 
