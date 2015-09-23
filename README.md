@@ -92,7 +92,7 @@ angular.module('demo')
 ```javascript
 angular.module('demo')
   .factory('ParseComment', ['Parse', function(Parse) {
-    var ParseComment = Parse.Object.extend("ParseComment", {/*...*/}, {/*...*/});
+    var ParseComment = Parse.Object.extend('Comment', {/*...*/}, {/*...*/});
     Parse.defineAttributes(ParseComment, ['user', 'text']);
     
     /*
