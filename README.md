@@ -151,7 +151,7 @@ angular.module('demo')
 ### Query
 ```javascript
 angular.module('demo')
-  .controller('CommentsController', ['$scope', 'Parse', 'ParseCommentClass', function($scope, Parse, ParseComment) {
+  .controller('CommentsController', ['$scope', 'Parse', 'ParseComment', function($scope, Parse, ParseComment) {
     new Parse.Query(ParseComment)
       .include('user')
       .find()
