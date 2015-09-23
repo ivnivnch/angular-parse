@@ -2,7 +2,7 @@
 Angular wrapper for [Parse.com JavaScript SDK](https://parse.com/docs/js/api/).
 ## Features
 ### Getters and setters for attributes
-#### Object attributes
+#### Define object attributes
 ```javascript
 var object = new Parse.Object('Test');
 Parse.defineAttributes(object, ['a', 'b', 'c']);
@@ -10,7 +10,7 @@ object.a = 123;
 console.assert(object.a == 123);
 console.assert(object.get('a') == 123);
 ```
-#### Subclass attributes
+#### Define subclass attributes
 ```javascript
 var MyClass = Parse.Object.extend("ClassName");
 Parse.defineAttributes(MyClass, ['a', 'b', 'c']);
@@ -19,7 +19,7 @@ object.a = 123;
 console.assert(object.a == 123);
 console.assert(object.get('a') == 123);
 ```
-#### Decorator
+#### Use decorator
 ```javascript
 @Parse.defineAttributes(['a', 'b', 'c'])
 class MyClass extends Parse.Object {
