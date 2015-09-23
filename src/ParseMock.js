@@ -1,4 +1,4 @@
-var Parse = require('parse').Parse;
+var Parse = require('parse');
 require('./Parse.js');
 var ngParseModule = require('./module.js');
 
@@ -18,18 +18,16 @@ function ParseMockProvider() {
    * @name ngParse.ParseMock
    *
    * @requires $q
-   * @requires Parse
    *
    * @description
    * Parse Mock.
    */
   provider.$get = ParseMockFactory;
-  ParseMockFactory.$inject = ['$q', 'Parse'];
+  ParseMockFactory.$inject = ['$q'];
   function ParseMockFactory($q) {
     function ParseMock(cb) {
       return function () {
         var args = Array.prototype.slice.call(arguments, 0);
-
         try {
           return $q.resolve(cb.apply(this, args));
         } catch (err) {

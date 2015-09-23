@@ -9,7 +9,7 @@ module.exports = {
   },
   externals: {
     angular: 'window.angular',
-    parse: 'window.Parse && window'
+    parse: 'window.Parse'
   },
   plugins: [
     new webpack.optimize.DedupePlugin(),

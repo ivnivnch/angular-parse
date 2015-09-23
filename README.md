@@ -1,39 +1,61 @@
 # Angular-Parse
-Angular wrapper for [Parse.com JavaScript SDK](https://parse.com/docs/js/guide).
+Angular wrapper for [Parse.com JavaScript SDK](https://parse.com/docs/js/api/).
 ## Features
-#### ES5 getters and setters for attributes
+### Getters and setters for attributes
+#### Object attributes
 ```javascript
-var TestClass = new Parse.Class('Test', {
-  $attributes: ['myAttr']
-});
-
-$scope.test = new TestClass();
-$scope.test.myAttr = 'value';
-console.assert($scope.test.myAttr == 'value');
-console.assert($scope.test.get('myAttr') == 'value');
+var object = new Parse.Object('Test');
+Parse.defineAttributes(object, ['a', 'b', 'c']);
+object.a = 123;
+console.assert(object.a == 123);
+console.assert(object.get('a') == 123);
 ```
-#### $q promise
+#### Subclass attributes
 ```javascript
-$scope.test.save()
+var MyClass = Parse.Object.extend("ClassName");
+Parse.defineAttributes(MyClass, ['a', 'b', 'c']);
+var object = new MyClass();
+object.a = 123;
+console.assert(object.a == 123);
+console.assert(object.get('a') == 123);
+```
+#### Decorator
+```javascript
+@Parse.defineAttributes(['a', 'b', 'c'])
+class MyClass extends Parse.Object {
+  constructor() {
+    super("ClassName");
+  }
+}
+var object = new MyClass();
+object.a = 123;
+console.assert(object.a == 123);
+console.assert(object.get('a') == 123);
+```
+### $q Promise
+```javascript
+object.save()
   .then(function() {
     $scope.saved = true;
   })
-  .catch(function(err) {});
+  .catch(function(err) {
+    $scope.error = err;
+  });
 ```
 ## Installation
-#### NPM
+### NPM
 `npm install angular-parse`
 ## Setup
-#### Browser
+### Browser
 ```html
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
-<script src="https://parse.com/downloads/javascript/parse-1.5.0.min.js"></script>
-<script src="path/to/angular-parse/angular-parse.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.6/angular.min.js"></script>
+<script src="https://parse.com/downloads/javascript/parse-1.6.2.min.js"></script>
+<script src="angular-parse/angular-parse.js"></script>
 <script>
   angular.module('demo', ['ngParse']);
 </script>
 ```
-#### CommonJS
+### CommonJS
 `npm install angular parse angular-parse`
 ```javascript
 var angular = require('angular');
@@ -41,18 +63,18 @@ var ngParse = require('angular-parse');
 angular.module('demo', [ngParse]);
 ```
 ## Usage
-#### Include `ngParse` module
+### Include `ngParse` module
 ```javascript
 angular.module('demo', ['ngParse']);
 ```
-#### Initialize Parse
+### Initialize Parse
 ```javascript
 angular.module('demo')
   .config(['ParseProvider', function(ParseProvider) {
     ParseProvider.initialize(MY_PARSE_APP_ID, MY_PARSE_JS_KEY);
   }]);
 ```
-#### Initialize Facebook
+### Initialize Facebook
 ```html
 <script src="https://connect.facebook.net/en_US/sdk.js"></script>
 ```
@@ -66,45 +88,53 @@ angular.module('demo')
     });
   }]);
 ```
-#### Define Class
+### Subclass
 ```javascript
 angular.module('demo')
-  .factory('ParseCommentClass', ['Parse', function(Parse) {
-    return new Parse.Class('Comment', {
-      //attributes for which you want to create es5 getters and setters
-      $attributes: ['user', 'text']
-    });
-  }])
-  .config(['ParseProvider', function(ParseProvider) {
-    //register factory
-    ParseProvider.Class.register('ParseCommentClass');
+  .factory('ParseComment', ['Parse', function(Parse) {
+    var ParseComment = Parse.Object.extend("ParseComment", {/*...*/}, {/*...*/});
+    Parse.defineAttributes(ParseComment, ['user', 'text']);
+    
+    /*
+      Or use decorator with Babel https://babeljs.io/
+      
+      @Parse.defineAttributes('user', 'text')
+      class ParseComment extends Parse.Object {
+        constructor() {
+          super("Comment");
+        }
+      }
+      Parse.Object.registerSubclass('Comment', ParseComment);
+    */
   }]);
 ```
-#### Define User attributes
+### User attributes
 ```javascript
 angular.module('demo')
   .config(['ParseProvider', function(ParseProvider) {
-    //attributes for which you want to create es5 getters and setters
-    ParseProvider.User.defineAttributes('first_name', 'last_name', 'picture', 'comments');
+    ParseProvider.defineAttributes(ParseProvider.User, 'first_name', 'last_name', 'picture', 'comments');
   }]);
 ```
-#### Authenticate
+### Authenticate
 ```javascript
 angular.module('demo')
-  .run(['Parse', function(Parse) {
-    if (!Parse.User.current()) {
+  .run(['$rootScope', 'Parse', function($rootScope, Parse) {
+    if (!Parse.User.authenticated()) {
       Parse.FacebookUtils.logIn('email', {})
-        .then(function() {})
-        .catch(function(err) {});
+        .then(function(user) {
+          $rootScope.user = user;
+        })
+        .catch(function(err) {/*...*/});
     }
   }]);
 ```
-#### Class instance
+### Class instance
 ```javascript
 angular.module('demo')
-  .controller('CommentController', ['$scope', 'Parse', 'ParseCommentClass', function($scope, Parse, ParseCommentClass) {
+  .controller('CommentController', ['$scope', 'Parse', 'ParseComment', function($scope, Parse, ParseComment) {
     var user = Parse.User.current();
-    $scope.comment = new ParseCommentClass({user: user});
+    $scope.comment = new ParseComment();
+    $scope.comment.set({user: user});
   }]);
 ```
 ```html
@@ -118,18 +148,18 @@ angular.module('demo')
   <input type="submit" value="Save"/>
 </form>
 ```
-#### Query
+### Query
 ```javascript
 angular.module('demo')
-  .controller('CommentsController', ['$scope', 'Parse', 'ParseCommentClass', function($scope, Parse, ParseCommentClass) {
-    new Parse.Query(ParseCommentClass)
+  .controller('CommentsController', ['$scope', 'Parse', 'ParseCommentClass', function($scope, Parse, ParseComment) {
+    new Parse.Query(ParseComment)
       .include('user')
       .find()
       .then(function(comments) {
         $scope.comments = comments;
       })
       .catch(function(err) {
-        console.error(err);
+        $scope.error = err;
       });
   }]);
 ```
@@ -143,20 +173,5 @@ angular.module('demo')
   </div>
 </div>
 ```
-#### Events
-```javascript
-angular.module('demo')
-  .controller('MainController', ['$scope', 'Parse', function($scope, Parse) {
-    var user = Parse.User.current();
-    
-    user.$on($scope, 'change', function() {
-      $scope.userChanged = true;
-    });
-    
-    user.name = 'new name';
-    user.save();
-  }]);
-```
-## Test
 ## License
 [MIT](https://raw.githubusercontent.com/ivnivnch/angular-parse/master/LICENSE)

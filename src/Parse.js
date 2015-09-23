@@ -1,118 +1,201 @@
-var Parse = require('parse').Parse;
+var Parse = require('parse');
 var ngParseModule = require('./module.js');
-require('./ParseClass.js');
-require('./ParseCloud.js');
-require('./ParseFacebookUtils');
-require('./ParseFile');
-require('./ParseObject.js');
-require('./ParseQuery.js');
-require('./ParseUser.js');
-require('./ParseUtils.js');
 
 /**
  * @ngdoc object
  * @name ngParse.ParseProvider
  *
- * @requires ngParse.ParseClassProvider
- * @requires ngParse.ParseFacebookUtilsProvider
- * @requires ngParse.ParseUserProvider
- *
  * @description
  * Provider for Parse service.
  */
-ParseProvider.$inject = ['ParseClassProvider', 'ParseFacebookUtilsProvider', 'ParseUserProvider'];
-function ParseProvider(ParseClassProvider, ParseFacebookUtilsProvider, ParseUserProvider) {
-  var provider = this;
-
+ParseProvider.$inject = [];
+function ParseProvider() {
   /**
-   * @ngdoc property
-   * @name ngParse.ParseProvider#Parse
-   * @propertyOf ngParse.ParseProvider
+   * Defines getters and setters for the attributes
+   * of the given object or function prototype.
+   * Or create a decorator that defines getters
+   * and setters for the subclass Parse.Object.
+   *
+   * @param {Object|Function|String|String[]} object
+   * @param {...String|String[]=} attributes
+   * @returns {*}
    */
-  provider.Parse = Parse;
+  function defineAttributes(object, attributes) {
+    if (object instanceof Parse.Object) {
+      if (!(attributes instanceof Array)) attributes = Array.prototype.slice.call(arguments, 1);
+      attributes.forEach(function (attribute) {
+        Object.defineProperty(object, attribute, {
+          get: function () {
+            return this.get(attribute);
+          },
+          set: function (value) {
+            this.set(attribute, value);
+          },
+          configurable: true,
+          enumerable: true
+        });
+      });
+    } else if (typeof object == 'function') {
+      return defineAttributes(object.prototype, attributes)
+    } else {
+      if (object instanceof Array) attributes = object;
+      else attributes = Array.prototype.slice.call(arguments, 0);
+      return function defineAttributesDecorator(target) {
+        defineAttributes(target, attributes);
+      }
+    }
+  }
 
-  /**
-   * @ngdoc property
-   * @name ngParse.ParseProvider#Class
-   * @propertyOf ngParse.ParseProvider
-   */
-  provider.Class = ParseClassProvider;
+  // Parse
+  var AngularParse = Object.create(Parse);
 
-  /**
-   * @ngdoc property
-   * @name ngParse.ParseProvider#FacebookUtils
-   * @propertyOf ngParse.ParseProvider
-   */
-  provider.FacebookUtils = ParseFacebookUtilsProvider;
+  // ParseObject
+  Object.defineProperty(AngularParse.Object.prototype, '$id', {
+    get: function () {
+      return this.$$id === undefined || this.$$id === null ? this.id : this.$$id;
+    },
+    set: function (value) {
+      this.$$id = value;
+    },
+    configurable: true,
+    enumerable: false
+  });
 
-  /**
-   * @ngdoc property
-   * @name ngParse.ParseProvider#User
-   * @propertyOf ngParse.ParseProvider
-   */
-  provider.User = ParseUserProvider;
+  // ParseUser
+  defineAttributes(AngularParse.User, ['email', 'password', 'username']);
+
+  var provider = AngularParse;
 
   /**
    * @ngdoc method
-   * @name ngParse.ParseProvider#initialize
+   * @name ngParse.ParseProvider#defineAttributes
    * @methodOf ngParse.ParseProvider
-   *
-   * @description
-   * Initializes Parse.
-   * See [Parse.initialize]{@link https://parse.com/docs/js/api/symbols/Parse.html#.initialize}.
-   *
-   * @param {String} applicationId Your Parse Application ID.
-   * @param {String} javaScriptKey Your Parse JavaScript Key.
+   * @static
+   * @see {@link defineAttributes}
    */
-  provider.initialize = function (applicationId, javaScriptKey) {
-    Parse.initialize(applicationId, javaScriptKey);
-  };
+  provider.defineAttributes = defineAttributes;
 
   /**
-   * @ngdoc object
+   * @ngdoc service
    * @name ngParse.Parse
    *
-   * @requires ngParse.ParseClass
-   * @requires ngParse.ParseCloud
-   * @requires ngParse.ParseFacebookUtils
-   * @requires ngParse.ParseFile
-   * @requires ngParse.ParseObject
-   * @requires ngParse.ParseQuery
-   * @requires ngParse.ParseUser
-   * @requires ngParse.ParseUtils
+   * @requires $q
    *
    * @description
-   * This is a wrapper for [Parse]{@link https://parse.com/docs/js/api/symbols/Parse.html}.
+   * This is a wrapper for [Parse]{@link https://parse.com/docs/js/api/classes/Parse.html}.
    */
   provider.$get = ParseFactory;
-  ParseFactory.$inject = [
-    'ParseClass',
-    'ParseCloud',
-    'ParseFacebookUtils',
-    'ParseFile',
-    'ParseObject',
-    'ParseQuery',
-    'ParseUser',
-    'ParseUtils'
-  ];
-  function ParseFactory() {
-    return Parse;
-  }
-}
+  ParseFactory.$inject = ['$q'];
+  function ParseFactory($q) {
+    /**
+     * Wraps Promise.
+     *
+     * @param {Object} promise
+     * @param {Object} parsePromise
+     * @returns {Object}
+     */
+    function wrapParsePromise(promise, parsePromise) {
+      promise._rejected = parsePromise._rejected;
+      promise._rejectedCallbacks = parsePromise._rejectedCallbacks;
+      promise._resolved = parsePromise._resolved;
+      promise._resolvedCallbacks = parsePromise._resolvedCallbacks;
+      promise._result = parsePromise._result;
+      promise.reject = parsePromise.reject;
+      promise.resolve = parsePromise.resolve;
 
-/**
- * @ngdoc function
- * @name init
- *
- * @requires ngParse.Parse
- *
- * @description
- * Initializes ngParse.
- */
-init.$inject = ['Parse'];
-function init() {
+      ['_continueWith', '_thenRunCallbacks', 'always', 'done', 'fail'].forEach(function (method) {
+        promise[method] = wrap(parsePromise[method]);
+      });
+
+      ['then', 'catch'].forEach(function (method) {
+        var func = promise[method];
+        promise[method] = function wrappedAngularPromise() {
+          var args = Array.prototype.slice.call(arguments, 0);
+          var promise = func.apply(this, args);
+          wrapParsePromise(promise, parsePromise);
+          return promise;
+        };
+      });
+
+      return promise;
+    }
+
+    /**
+     * Wraps function.
+     *
+     * @param {Function} func Function that returns
+     * [Parse.Promise]{@link https://parse.com/docs/js/api/classes/Parse.Promise.html}.
+     * @returns {Function} Function that returns $q promises.
+     */
+    function wrap(func) {
+      return function wrappedParsePromise() {
+        var args = Array.prototype.slice.call(arguments, 0);
+        var parsePromise = func.apply(this, args);
+        var promise = $q(parsePromise.then.bind(parsePromise));
+        wrapParsePromise(promise, parsePromise);
+        return promise;
+      };
+    }
+
+    /**
+     * Wraps object.
+     *
+     * @param {Object} object
+     * @param {...String|String[]=} methods
+     */
+    function wrapObject(object, methods) {
+      if (!(methods instanceof Array)) methods = Array.prototype.slice.call(arguments, 1);
+      methods.forEach(function (method) {
+        object[method] = wrap(object[method]);
+      });
+    }
+
+    /**
+     * @ngdoc method
+     * @name ngParse.Parse#wrapObject
+     * @methodOf ngParse.Parse
+     * @static
+     * @see {@link wrapObject}
+     */
+    AngularParse.wrapObject = wrapObject;
+
+    // ParseCloud
+    wrapObject(AngularParse.Cloud, ['run']);
+
+    // ParseConfig
+    wrapObject(AngularParse.Config, ['get']);
+
+    //FacebookUtils
+    wrapObject(AngularParse.FacebookUtils, ['link', 'logIn', 'unlink']);
+
+    // ParseFile
+    wrapObject(AngularParse.File.prototype, ['save']);
+
+    // ParseObject
+    wrapObject(AngularParse.Object, ['destroyAll', 'fetchAll', 'fetchAllIfNeeded', 'saveAll']);
+    wrapObject(AngularParse.Object.prototype, ['destroy', 'fetch', 'save']);
+
+    // ParsePromise
+    wrapObject(AngularParse.Promise, ['_continueWhile', 'as', 'error', 'when']);
+
+    // ParsePush
+    wrapObject(AngularParse.Push, ['send']);
+
+    // ParseQuery
+    wrapObject(AngularParse.Query.prototype, ['count', 'each', 'find', 'first', 'get']);
+
+    // ParseSession
+    wrapObject(AngularParse.Session, ['current']);
+
+    // ParseUser
+    wrapObject(AngularParse.User, ['become', 'currentAsync', 'enableRevocableSession', 'logIn', 'logOut', 'requestPasswordReset', 'signUp']);
+    wrapObject(AngularParse.User.prototype, ['logIn', 'signUp']);
+
+    return AngularParse;
+  }
+
+  return provider;
 }
 
 ngParseModule
-  .provider('Parse', ParseProvider)
-  .run(init);
+  .provider('Parse', ParseProvider);
