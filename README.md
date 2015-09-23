@@ -165,7 +165,7 @@ angular.module('demo')
 ```
 ```html
 <div ng-controller="CommentsController">
-  <div ng-repeat="comment in comments track by comment.$id">
+  <div ng-repeat="comment in comments track by comment.id">
     <p>User: {{comment.user.username}}</p>
     <img ng-src="comment.user.picture"/>
     <p>{{comment.text}}</p>
