@@ -1,5 +1,4 @@
 var Parse = require('parse');
-var ParseMock = require('../src/ParseMock.js');
 
 describe('Parse', function () {
   beforeEach(angular.mock.module('ngParse'));
