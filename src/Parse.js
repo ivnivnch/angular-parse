@@ -95,13 +95,10 @@ function ParseProvider() {
      * @returns {Object}
      */
     function wrapParsePromise(promise, parsePromise) {
-      promise._rejected = parsePromise._rejected;
-      promise._rejectedCallbacks = parsePromise._rejectedCallbacks;
-      promise._resolved = parsePromise._resolved;
-      promise._resolvedCallbacks = parsePromise._resolvedCallbacks;
-      promise._result = parsePromise._result;
-      promise.reject = parsePromise.reject;
-      promise.resolve = parsePromise.resolve;
+      ['_rejected', '_rejectedCallbacks', '_resolved', '_resolvedCallbacks', '_result', 'reject', 'resolve']
+        .forEach(function (prop) {
+          promise[prop] = parsePromise[prop];
+        });
 
       ['_continueWith', '_thenRunCallbacks', 'always', 'done', 'fail'].forEach(function (method) {
         promise[method] = wrap(parsePromise[method]);
