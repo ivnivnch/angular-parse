@@ -133,7 +133,7 @@ angular.module('demo')
   .controller('CommentController', ['$scope', 'Parse', 'ParseComment', function($scope, Parse, ParseComment) {
     var user = Parse.User.current();
     $scope.comment = new ParseComment();
-    $scope.comment.set({user: user});
+    $scope.comment.user = user;
   }]);
 ```
 ```html
