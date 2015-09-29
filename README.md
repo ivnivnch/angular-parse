@@ -7,7 +7,6 @@ Angular wrapper for [Parse.com JavaScript SDK](https://parse.com/docs/js/api/).
 var object = new Parse.Object('Test');
 Parse.defineAttributes(object, ['a', 'b', 'c']);
 object.a = 123;
-console.assert(object.a == 123);
 console.assert(object.get('a') == 123);
 ```
 #### Define subclass attributes
@@ -16,7 +15,6 @@ var MyClass = Parse.Object.extend("ClassName");
 Parse.defineAttributes(MyClass, ['a', 'b', 'c']);
 var object = new MyClass();
 object.a = 123;
-console.assert(object.a == 123);
 console.assert(object.get('a') == 123);
 ```
 #### Use decorator
@@ -29,7 +27,6 @@ class MyClass extends Parse.Object {
 }
 var object = new MyClass();
 object.a = 123;
-console.assert(object.a == 123);
 console.assert(object.get('a') == 123);
 ```
 ### $q Promise
@@ -106,6 +103,8 @@ angular.module('demo')
       }
       Parse.Object.registerSubclass('Comment', ParseComment);
     */
+    
+    return ParseComment;
   }]);
 ```
 ### User attributes
