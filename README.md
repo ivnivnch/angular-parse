@@ -42,6 +42,8 @@ object.save()
 ## Installation
 ### NPM
 `npm install angular-parse`
+### Bower
+`bower install angular-parse-bower`
 ## Setup
 ### Browser
 ```html
