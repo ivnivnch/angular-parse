@@ -1,7 +1,7 @@
 {
   "name": "angular-parse-bower",
   "description": "Angular wrapper for Parse.com JavaScript SDK.",
-  "main": "src/index.js",
+  "main": "angular-parse.js",
   "authors": [
     "<ivnivnch@gmail.com>"
   ],
