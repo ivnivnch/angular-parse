@@ -1,6 +1,6 @@
 {
   "name": "angular-parse",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Angular wrapper for Parse.com JavaScript SDK.",
   "license": "MIT",
   "author": "<ivnivnch@gmail.com>",
