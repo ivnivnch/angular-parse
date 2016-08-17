@@ -113,7 +113,7 @@ angular.module('demo')
 ```javascript
 angular.module('demo')
   .config(['ParseProvider', function(ParseProvider) {
-    ParseProvider.defineAttributes(ParseProvider.User, 'first_name', 'last_name', 'picture', 'comments');
+    ParseProvider.defineAttributes(ParseProvider.User, ['first_name', 'last_name', 'picture', 'comments']);
   }]);
 ```
 ### Authenticate
